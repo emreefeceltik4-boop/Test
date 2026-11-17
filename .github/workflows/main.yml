@@ -1,0 +1,28 @@
+Name: Windows Cloud PC
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+  
+    runs-on: windows-latest
+    timeout-minutes: 360
+
+    steps:
+    - name: Tailscale Connect
+      uses: tailscale/github-action@v2
+      with:
+        authkey: ${{ secrets.TS_AUTHKEY }}
+        version: latest
+
+    - name: Enable RDP (Remote Desktop)
+      run: |
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 1
+
+    - name: Keep Alive
+      run: |
+        Write-Host "Windows PC aktif! Baglanabilirsiniz."
+        Start-Sleep -Seconds 21600
